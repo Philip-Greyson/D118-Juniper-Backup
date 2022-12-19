@@ -1,0 +1,6 @@
+token.json
+IPList.txt
+credentials.json
+backupLog.txt
+sessionLog.txt
+**/*.cfg
