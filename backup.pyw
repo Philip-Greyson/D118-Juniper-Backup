@@ -133,7 +133,7 @@ if __name__ == '__main__':
         configs = glob.glob('Configs/*.cfg')
         for config in configs:
             filename = config.split('/')[1] # linux
-            # filename = config.split('\')[1] # windows
+            # filename = config.split('\\')[1] # windows
             parentsArray = [todaysFolderID]
             print(f'ACTION: Uploading {filename} to Google Drive Folder {todaysFolderID}')
             print(f'ACTION: Uploading {filename} to Google Drive Folder {todaysFolderID}', file=log)
