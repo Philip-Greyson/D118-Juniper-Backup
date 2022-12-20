@@ -132,7 +132,8 @@ if __name__ == '__main__':
         # go through all the .cfg files and upload them to the google drive folder we got the ID from at the beginning
         configs = glob.glob('Configs/*.cfg')
         for config in configs:
-            filename = config.split('/')[1]
+            filename = config.split('/')[1] # linux
+            # filename = config.split('\')[1] # windows
             parentsArray = [todaysFolderID]
             print(f'ACTION: Uploading {filename} to Google Drive Folder {todaysFolderID}')
             print(f'ACTION: Uploading {filename} to Google Drive Folder {todaysFolderID}', file=log)
