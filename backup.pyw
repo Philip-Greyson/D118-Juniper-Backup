@@ -30,7 +30,7 @@ SCOPES = ['https://www.googleapis.com/auth/drive']
 SWITCH_USERNAME = os.environ.get('JUNIPER_USERNAME')
 SWITCH_PASSWORD = os.environ.get('JUNIPER_PASSWORD')
 IP_LIST_FILE = 'IPList.txt'
-TEAM_DRIVE_ID = '0AHXBA7DxIPfDUk9PVA'
+SHARED_DRIVE_ID = '0AHXBA7DxIPfDUk9PVA'
 DRIVE_FOLDER_NAME = 'Juniper Switch Configs'
 
 
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         #     print(drive)
 
         # search for the parent folder of "Juniper Switch Configs" either in a shared drive or in the personal drive
-        JuniperFolders = service.files().list(corpora='drive',driveId=TEAM_DRIVE_ID,includeItemsFromAllDrives=True,supportsAllDrives=True,q="mimeType='application/vnd.google-apps.folder' and name='"+ DRIVE_FOLDER_NAME +"'").execute()  # execute the search for the parent folder within the specific shared drive
+        JuniperFolders = service.files().list(corpora='drive',driveId=SHARED_DRIVE_ID,includeItemsFromAllDrives=True,supportsAllDrives=True,q="mimeType='application/vnd.google-apps.folder' and name='"+ DRIVE_FOLDER_NAME +"'").execute()  # execute the search for the parent folder within the specific shared drive
         # JuniperFolders = service.files().list(corpora='user',q="mimeType='application/vnd.google-apps.folder' and name='Juniper Switch Configs'").execute() # for personal drive and not shared drive
         JuniperFolders = JuniperFolders.get('files',[])
         if JuniperFolders:  # check and see if the parent folder exists
@@ -84,7 +84,7 @@ if __name__ == '__main__':
             print(f'INFO: Found folder with name "{juniperFolderName}" and ID: {juniperFolderID}')
             print(f'INFO: Found folder with name "{juniperFolderName}" and ID: {juniperFolderID}', file=log)
             # now search for a folder that is just named with todays date, if it exists we can just use it, otherwise create it
-            todaysFolder = service.files().list(corpora='drive',driveId=TEAM_DRIVE_ID,includeItemsFromAllDrives=True,supportsAllDrives=True,q="mimeType='application/vnd.google-apps.folder' and name='" + date + "'").execute()
+            todaysFolder = service.files().list(corpora='drive',driveId=SHARED_DRIVE_ID,includeItemsFromAllDrives=True,supportsAllDrives=True,q="mimeType='application/vnd.google-apps.folder' and name='" + date + "'").execute()
             # todaysFolder = folders = service.files().list(corpora='user',q="mimeType='application/vnd.google-apps.folder' and name='" + date + "'").execute()
             todaysFolder = todaysFolder.get('files',[])
             if todaysFolder:  # check to see if todays date folder already exists
@@ -96,25 +96,38 @@ if __name__ == '__main__':
                 juniperParentID = [juniperFolderID]  # make an array that just has the id of the parent juniper folder in it since the argument needs to be passed as an array
                 print(f'ACTION: Folder {date} does not exist, will create')
                 print(f'ACTION: Folder {date} does not exist, will create', file=log)
-                file_metadata = {'name': date, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : juniperParentID, 'driveId' : TEAM_DRIVE_ID}  # define the parents, the team driveID, and the fact its a folder
+                file_metadata = {'name': date, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : juniperParentID, 'driveId' : SHARED_DRIVE_ID}  # define the parents, the team driveID, and the fact its a folder
                 # file_metadata = {'name': date, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : juniperParentID} # just for personal drive
                 todaysFolder = service.files().create(body=file_metadata, fields='id', supportsAllDrives=True).execute()  # do the creation of the today folder within the parent folder and on the team drive
                 # todaysFolder = service.files().create(body=file_metadata, fields='id').execute() # for personal drives
                 todaysFolderName = todaysFolder.get('name')
                 todaysFolderID = todaysFolder.get('id')
-                print(f'Folder {date} created with ID {todaysFolderID}')
+                print(f'ACTION: Folder {date} created with ID {todaysFolderID}')
+                print(f'ACTION: Folder {date} created with ID {todaysFolderID}', file=log)
         else:
             print(f'ERROR: No parent folder "{DRIVE_FOLDER_NAME}" found, will try to create. Run the script again to properly backup config files')
             print(f'ERROR: No parent folder "{DRIVE_FOLDER_NAME}" found, will try to create. Run the script again to properly backup config files', file=log)
             # creat the new Juniper Switch Configs folder
-            driveParentID = [TEAM_DRIVE_ID]
-            file_metadata = {'name':DRIVE_FOLDER_NAME, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : driveParentID, 'driveId' : TEAM_DRIVE_ID}
+            driveParentID = [SHARED_DRIVE_ID]
+            file_metadata = {'name':DRIVE_FOLDER_NAME, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : driveParentID, 'driveId' : SHARED_DRIVE_ID}
             # file_metadata = {'name':'Juniper Switch Configs', 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : driveParentID} # for personal drive
             folder = service.files().create(body=file_metadata, fields='id', supportsAllDrives=True).execute()  # do the creation of the parent folder on the team drive
             # folder = service.files().create(body=file_metadata, fields='id').execute() # for personal drive
             folderID = folder.get('id')
             print(f'ACTION: Folder "{DRIVE_FOLDER_NAME}" created with ID {folderID}')
             print(f'ACTION: Folder "{DRIVE_FOLDER_NAME}" created with ID {folderID}', file=log)
+            # then do the creation of the daily folder inside this new folder
+            juniperParentID = [folderID]  # make an array that just has the id of the parent folder in it since the argument needs to be passed as an array
+            print(f'ACTION: Folder {date} does not exist, will create')
+            print(f'ACTION: Folder {date} does not exist, will create', file=log)
+            file_metadata = {'name': date, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : juniperParentID, 'driveId' : SHARED_DRIVE_ID}  # define the parents, the team driveID, and the fact its a folder
+            # file_metadata = {'name': date, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : juniperParentID} # just for personal drive
+            todaysFolder = service.files().create(body=file_metadata, fields='id', supportsAllDrives=True).execute()  # do the creation of the today folder within the parent folder and on the team drive
+            # todaysFolder = service.files().create(body=file_metadata, fields='id').execute() # for personal drives
+            todaysFolderName = todaysFolder.get('name')
+            todaysFolderID = todaysFolder.get('id')
+            print(f'ACTION: Folder {date} created with ID {todaysFolderID}')
+            print(f'ACTION: Folder {date} created with ID {todaysFolderID}', file=log)
 
         # open the input IP file and start going through each IP one at a time
         with open(IP_LIST_FILE, 'r') as inputFile:  # noqa: UP015
@@ -150,7 +163,7 @@ if __name__ == '__main__':
             parentsArray = [todaysFolderID]
             print(f'ACTION: Uploading {filename} to Google Drive Folder {todaysFolderID}')
             print(f'ACTION: Uploading {filename} to Google Drive Folder {todaysFolderID}', file=log)
-            file_metadata = {'name' : filename, 'parents' : parentsArray, 'driveID' : TEAM_DRIVE_ID}
+            file_metadata = {'name' : filename, 'parents' : parentsArray, 'driveID' : SHARED_DRIVE_ID}
             # file_metadata = {'name' : filename, 'parents' : parentsArray} # for personal drive
             media = MediaFileUpload(filename=config,mimetype='application/octet-stream',resumable=True)  # create the media body for the file, which is the file, file type, and wether it is resumable
             file = service.files().create(body=file_metadata, media_body=media,fields='id',supportsAllDrives=True).execute()  # do the creation of the file using previoulsy defined bodies
