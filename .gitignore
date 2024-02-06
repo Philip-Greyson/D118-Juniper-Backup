@@ -4,3 +4,4 @@ credentials.json
 backupLog.txt
 sessionLog.txt
 **/*.cfg
+ruff.toml
