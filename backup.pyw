@@ -96,6 +96,39 @@ if __name__ == '__main__':
                 juniperParentID = [juniperFolderID]  # make an array that just has the id of the parent juniper folder in it since the argument needs to be passed as an array
                 print(f'ACTION: Folder {date} does not exist, will create')
                 print(f'ACTION: Folder {date} does not exist, will create', file=log)
+                try:
+                    file_metadata = {'name': date, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : juniperParentID, 'driveId' : SHARED_DRIVE_ID}  # define the parents, the team driveID, and the fact its a folder
+                    # file_metadata = {'name': date, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : juniperParentID} # just for personal drive
+                    todaysFolder = service.files().create(body=file_metadata, fields='id', supportsAllDrives=True).execute()  # do the creation of the today folder within the parent folder and on the team drive
+                    # todaysFolder = service.files().create(body=file_metadata, fields='id').execute() # for personal drives
+                    todaysFolderName = todaysFolder.get('name')
+                    todaysFolderID = todaysFolder.get('id')
+                    print(f'ACTION: Folder {date} created with ID {todaysFolderID}')
+                    print(f'ACTION: Folder {date} created with ID {todaysFolderID}', file=log)
+                except Exception as er:
+                    print(f'ERROR while creating daily folder "{date}" inside of parent folder "{juniperFolderName}": {er}')
+                    print(f'ERROR while creating daily folder "{date}" inside of parent folder "{juniperFolderName}": {er}', file=log)
+        else:
+            print(f'WARN: No parent folder "{DRIVE_FOLDER_NAME}" found, will try to create. Run the script again to properly backup config files')
+            print(f'WARN: No parent folder "{DRIVE_FOLDER_NAME}" found, will try to create. Run the script again to properly backup config files', file=log)
+            try:
+                # create the new Juniper Switch Configs folder
+                driveParentID = [SHARED_DRIVE_ID]
+                file_metadata = {'name':DRIVE_FOLDER_NAME, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : driveParentID, 'driveId' : SHARED_DRIVE_ID}
+                # file_metadata = {'name':'Juniper Switch Configs', 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : driveParentID} # for personal drive
+                folder = service.files().create(body=file_metadata, fields='id', supportsAllDrives=True).execute()  # do the creation of the parent folder on the team drive
+                # folder = service.files().create(body=file_metadata, fields='id').execute() # for personal drive
+                folderID = folder.get('id')
+                print(f'ACTION: Folder "{DRIVE_FOLDER_NAME}" created with ID {folderID}')
+                print(f'ACTION: Folder "{DRIVE_FOLDER_NAME}" created with ID {folderID}', file=log)
+            except Exception as er:
+                print(f'ERROR while creating parent folder "{DRIVE_FOLDER_NAME} in parent shared drive with ID {driveParentID}: {er}')
+                print(f'ERROR while creating parent folder "{DRIVE_FOLDER_NAME} in parent shared drive with ID {driveParentID}: {er}', file=log)
+            # then do the creation of the daily folder inside this new folder
+            try:
+                juniperParentID = [folderID]  # make an array that just has the id of the parent folder in it since the argument needs to be passed as an array
+                print(f'ACTION: Folder {date} does not exist, will create')
+                print(f'ACTION: Folder {date} does not exist, will create', file=log)
                 file_metadata = {'name': date, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : juniperParentID, 'driveId' : SHARED_DRIVE_ID}  # define the parents, the team driveID, and the fact its a folder
                 # file_metadata = {'name': date, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : juniperParentID} # just for personal drive
                 todaysFolder = service.files().create(body=file_metadata, fields='id', supportsAllDrives=True).execute()  # do the creation of the today folder within the parent folder and on the team drive
@@ -104,30 +137,9 @@ if __name__ == '__main__':
                 todaysFolderID = todaysFolder.get('id')
                 print(f'ACTION: Folder {date} created with ID {todaysFolderID}')
                 print(f'ACTION: Folder {date} created with ID {todaysFolderID}', file=log)
-        else:
-            print(f'ERROR: No parent folder "{DRIVE_FOLDER_NAME}" found, will try to create. Run the script again to properly backup config files')
-            print(f'ERROR: No parent folder "{DRIVE_FOLDER_NAME}" found, will try to create. Run the script again to properly backup config files', file=log)
-            # creat the new Juniper Switch Configs folder
-            driveParentID = [SHARED_DRIVE_ID]
-            file_metadata = {'name':DRIVE_FOLDER_NAME, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : driveParentID, 'driveId' : SHARED_DRIVE_ID}
-            # file_metadata = {'name':'Juniper Switch Configs', 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : driveParentID} # for personal drive
-            folder = service.files().create(body=file_metadata, fields='id', supportsAllDrives=True).execute()  # do the creation of the parent folder on the team drive
-            # folder = service.files().create(body=file_metadata, fields='id').execute() # for personal drive
-            folderID = folder.get('id')
-            print(f'ACTION: Folder "{DRIVE_FOLDER_NAME}" created with ID {folderID}')
-            print(f'ACTION: Folder "{DRIVE_FOLDER_NAME}" created with ID {folderID}', file=log)
-            # then do the creation of the daily folder inside this new folder
-            juniperParentID = [folderID]  # make an array that just has the id of the parent folder in it since the argument needs to be passed as an array
-            print(f'ACTION: Folder {date} does not exist, will create')
-            print(f'ACTION: Folder {date} does not exist, will create', file=log)
-            file_metadata = {'name': date, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : juniperParentID, 'driveId' : SHARED_DRIVE_ID}  # define the parents, the team driveID, and the fact its a folder
-            # file_metadata = {'name': date, 'mimeType' : 'application/vnd.google-apps.folder', 'parents' : juniperParentID} # just for personal drive
-            todaysFolder = service.files().create(body=file_metadata, fields='id', supportsAllDrives=True).execute()  # do the creation of the today folder within the parent folder and on the team drive
-            # todaysFolder = service.files().create(body=file_metadata, fields='id').execute() # for personal drives
-            todaysFolderName = todaysFolder.get('name')
-            todaysFolderID = todaysFolder.get('id')
-            print(f'ACTION: Folder {date} created with ID {todaysFolderID}')
-            print(f'ACTION: Folder {date} created with ID {todaysFolderID}', file=log)
+            except Exception as er:
+                print(f'ERROR while creating daily folder "{date}" inside of parent folder "{DRIVE_FOLDER_NAME}": {er}')
+                print(f'ERROR while creating daily folder "{date}" inside of parent folder "{DRIVE_FOLDER_NAME}": {er}', file=log)
 
         # open the input IP file and start going through each IP one at a time
         with open(IP_LIST_FILE, 'r') as inputFile:  # noqa: UP015
@@ -158,15 +170,19 @@ if __name__ == '__main__':
         # go through all the .cfg files and upload them to the google drive folder we got the ID from at the beginning
         configs = glob.glob('Configs/*.cfg')
         for config in configs:
-            filename = config.split('/')[1]  # linux
-            # filename = config.split('\\')[1] # windows
-            parentsArray = [todaysFolderID]
-            print(f'ACTION: Uploading {filename} to Google Drive Folder {todaysFolderID}')
-            print(f'ACTION: Uploading {filename} to Google Drive Folder {todaysFolderID}', file=log)
-            file_metadata = {'name' : filename, 'parents' : parentsArray, 'driveID' : SHARED_DRIVE_ID}
-            # file_metadata = {'name' : filename, 'parents' : parentsArray} # for personal drive
-            media = MediaFileUpload(filename=config,mimetype='application/octet-stream',resumable=True)  # create the media body for the file, which is the file, file type, and wether it is resumable
-            file = service.files().create(body=file_metadata, media_body=media,fields='id',supportsAllDrives=True).execute()  # do the creation of the file using previoulsy defined bodies
-            # file = service.files().create(body=file_metadata, media_body=media,fields='id').execute() # for personal drives
-            print(F'INFO: Resulting File ID: {file.get("id")}')  # print out the resulting file ID
-            print(F'INFO: Resulting File ID: {file.get("id")}', file=log)  # print out the resulting file ID
+            try:
+                filename = config.split('/')[1]  # linux
+                # filename = config.split('\\')[1] # windows
+                parentsArray = [todaysFolderID]
+                print(f'ACTION: Uploading {filename} to Google Drive Folder {todaysFolderID}')
+                print(f'ACTION: Uploading {filename} to Google Drive Folder {todaysFolderID}', file=log)
+                file_metadata = {'name' : filename, 'parents' : parentsArray, 'driveID' : SHARED_DRIVE_ID}
+                # file_metadata = {'name' : filename, 'parents' : parentsArray} # for personal drive
+                media = MediaFileUpload(filename=config,mimetype='application/octet-stream',resumable=True)  # create the media body for the file, which is the file, file type, and wether it is resumable
+                file = service.files().create(body=file_metadata, media_body=media,fields='id',supportsAllDrives=True).execute()  # do the creation of the file using previoulsy defined bodies
+                # file = service.files().create(body=file_metadata, media_body=media,fields='id').execute() # for personal drives
+                print(F'INFO: Resulting File ID: {file.get("id")}')  # print out the resulting file ID
+                print(F'INFO: Resulting File ID: {file.get("id")}', file=log)  # print out the resulting file ID
+            except Exception as er:
+                print(f'ERROR while trying to upload {filename} to the folder {todaysFolderName} which has ID {todaysFolderID}, check to make sure the filename is parsed correctly: {er}')
+                print(f'ERROR while trying to upload {filename} to the folder {todaysFolderName} which has ID {todaysFolderID}, check to make sure the filename is parsed correctly: {er}', file=log)

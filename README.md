@@ -33,9 +33,10 @@ You must have a Google account that has the proper roles and privileges to acces
 
 ## Customization
 
-This script should be able to be easily customized to fit most use cases, as long as Juniper switches are used and you have access to a shared drive. The biggest thing you ***must*** customize:
+This script should be able to be easily customized to fit most use cases, as long as Juniper switches are used and you have access to a shared drive. The biggest things you ***must*** customize:
 
 - `SHARED_DRIVE_ID` is the Google ID for the shared drive that will house the configs parent folder. This can be found in one of two ways, either by navigating to it on the web through drive.google.com and then looking in the URL bar for the last section, see [here](https://robindirksen.com/blog/where-do-i-get-google-drive-folder-id) for an example. There is also a bit of code that should find all shared drives you have access to, though it does not seem to always list every drive, so I would recommend just using the URL method.
+- You must comment/uncomment the lines that define `filename = config.split('/')[1]` depending on your host OS. By default, the Linux version is enabled. Linux needs to have the / used, Windows uses \ for its paths so that must be used (with an extra \ as an escape character), so simply comment out the Linux line and uncomment the Windows one.
 
 Then there are some things you might want to customize to better suit your use:
 
